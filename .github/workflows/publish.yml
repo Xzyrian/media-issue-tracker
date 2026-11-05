@@ -26,6 +26,7 @@ jobs:
 
       - name: Package
         run: |
+          set -ex
           VERSION="${GITHUB_REF_NAME#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           mkdir -p dist
@@ -33,7 +34,7 @@ jobs:
           cp meta.json dist/
           sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" dist/meta.json
           sed -i "s/\"timestamp\": \"[^\"]*\"/\"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"/" dist/meta.json
-          (cd dist && zip -q "../Jellyfin.Plugin.Noteboard_${VERSION}.zip" .)
+          (cd dist && python3 -m zipfile -c "../Jellyfin.Plugin.Noteboard_${VERSION}.zip" Jellyfin.Plugin.Noteboard.dll meta.json)
           echo "MD5=$(md5sum "Jellyfin.Plugin.Noteboard_${VERSION}.zip" | cut -d' ' -f1)" >> "$GITHUB_ENV"
 
       - name: Create release
