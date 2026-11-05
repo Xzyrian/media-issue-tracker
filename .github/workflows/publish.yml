@@ -15,9 +15,9 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '9.0.x'
 
@@ -38,7 +38,7 @@ jobs:
           echo "MD5=$(md5sum "Jellyfin.Plugin.Noteboard_${VERSION}.zip" | cut -d' ' -f1)" >> "$GITHUB_ENV"
 
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: "Jellyfin.Plugin.Noteboard_${{ env.VERSION }}.zip"
           generate_release_notes: true
