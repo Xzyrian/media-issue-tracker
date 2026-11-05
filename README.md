@@ -31,7 +31,15 @@ dotnet build -c Release
 
 The plugin DLL lands in `bin\Release\net9.0\Jellyfin.Plugin.Noteboard.dll`.
 
-## Install
+## Install via repository (auto-update)
+
+1. In Jellyfin: **Dashboard → Plugins → Repositories → +** and add:
+   `https://raw.githubusercontent.com/<owner>/<repo>/manifest/manifest.json`
+2. Install **Media Issue Tracker** from the Catalog, restart Jellyfin, hard-refresh (Ctrl+F5).
+3. New versions appear as plugin updates automatically whenever a release is tagged
+   (`git tag vX.Y.Z.W && git push origin vX.Y.Z.W` — CI builds, releases, and updates the manifest).
+
+## Install manually
 
 1. Create a folder `Noteboard` inside Jellyfin's **plugins** directory:
    - Windows: `C:\Program Files\Jellyfin\Server\plugins\Noteboard` (or `%LOCALAPPDATA%\jellyfin\plugins\Noteboard` for per-user installs)
