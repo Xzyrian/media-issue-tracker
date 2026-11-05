@@ -18,8 +18,8 @@ internal static class InjectionMarkup
     // the server root (with or without a configured baseurl) — the API lives there.
     public const string Snippet =
         BeginMarker + "\n"
-        + "<link rel=\"stylesheet\" href=\"../Noteboard/Client/noteboard.css?v=1.2.1\" />\n"
-        + "<script defer src=\"../Noteboard/Client/noteboard.js?v=1.2.1\"></script>\n"
+        + "<link rel=\"stylesheet\" href=\"../Noteboard/Client/noteboard.css?v=1.2.2\" />\n"
+        + "<script defer src=\"../Noteboard/Client/noteboard.js?v=1.2.2\"></script>\n"
         + EndMarker;
 }
 

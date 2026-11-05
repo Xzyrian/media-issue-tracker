@@ -9,7 +9,7 @@
   'use strict';
 
   var CONTAINER_ID = 'jellyfin-noteboard';
-  var SCRIPT_VERSION = '1.2.1';
+  var SCRIPT_VERSION = '1.2.2';
   console.log('[Noteboard] client script loaded, v' + SCRIPT_VERSION);
 
   // Derive the API base (including any configured baseurl) from this script's own URL.
@@ -519,13 +519,18 @@
   }
 
   function findHomePage() {
-    var direct = document.querySelector('.homePage, #indexPage');
-    if (direct) return direct;
+    // The SPA keeps cached views in the DOM — a hidden .homePage can linger while a
+    // different, visible home view is actually on screen. Only accept visible elements.
+    var all = document.querySelectorAll('.homePage, #indexPage');
+    var i;
+    for (i = 0; i < all.length; i++) {
+      if (all[i].offsetParent !== null) return all[i];
+    }
     // Fallback: if the URL hash says we're on the home page, grab the visible page element.
     var hash = (location.hash || '').toLowerCase();
     if (hash.indexOf('home') !== -1 || hash === '' || hash === '#' || hash === '#/' || hash === '#!/') {
       var pages = document.querySelectorAll('.page:not(.hide), [data-role="page"]:not(.hide)');
-      for (var i = 0; i < pages.length; i++) {
+      for (i = 0; i < pages.length; i++) {
         if (pages[i].offsetParent !== null) return pages[i];
       }
     }
@@ -552,6 +557,13 @@
     if (mounted) {
       var existing = document.getElementById(CONTAINER_ID);
       if (existing && document.contains(existing)) {
+        // The view we mounted into may have been swapped for a fresh home view by the
+        // SPA (cached view hidden, new view shown). If the board isn't inside the
+        // currently visible home page, move it there instead of remounting.
+        var visibleHome = findHomePage();
+        if (visibleHome && !visibleHome.contains(existing)) {
+          insertOnHomePage(visibleHome, existing);
+        }
         ensurePosition();
         return;
       }
