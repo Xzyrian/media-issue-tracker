@@ -12,8 +12,8 @@
         "changelog": "Release 1.2.1.0",
         "targetAbi": "10.11.0.0",
         "sourceUrl": "https://github.com/CMAYK/media-issue-tracker/releases/download/v1.2.1.0/Jellyfin.Plugin.Noteboard_1.2.1.0.zip",
-        "checksum": "a82b122ae19de5f0017b687fc796fae3",
-        "timestamp": "2026-11-05T03:36:45Z"
+        "checksum": "a5d191663622c239721428fa2a2a6d36",
+        "timestamp": "2026-11-05T03:47:30Z"
       }
     ]
   }
