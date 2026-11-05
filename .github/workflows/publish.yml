@@ -1,0 +1,80 @@
+name: Publish plugin
+
+# Tag a release to publish:  git tag v1.2.2.0 && git push origin v1.2.2.0
+# This builds the DLL, attaches a plugin zip to a GitHub release, and updates
+# the Jellyfin repository manifest on the "manifest" branch.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Build
+        run: dotnet build -c Release
+
+      - name: Package
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          mkdir -p dist
+          cp "bin/Release/net9.0/Jellyfin.Plugin.Noteboard.dll" dist/
+          cp meta.json dist/
+          sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" dist/meta.json
+          sed -i "s/\"timestamp\": \"[^\"]*\"/\"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"/" dist/meta.json
+          (cd dist && zip -q "../Jellyfin.Plugin.Noteboard_${VERSION}.zip" .)
+          echo "MD5=$(md5sum "Jellyfin.Plugin.Noteboard_${VERSION}.zip" | cut -d' ' -f1)" >> "$GITHUB_ENV"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "Jellyfin.Plugin.Noteboard_${{ env.VERSION }}.zip"
+          generate_release_notes: true
+
+      - name: Update repository manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          ZIP="Jellyfin.Plugin.Noteboard_${VERSION}.zip"
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${ZIP}"
+          ENTRY=$(jq -n \
+            --arg v "$VERSION" \
+            --arg url "$URL" \
+            --arg md5 "$MD5" \
+            --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{version: $v, changelog: ("Release " + $v), targetAbi: "10.11.0.0", sourceUrl: $url, checksum: $md5, timestamp: $ts}')
+          if git show-ref --verify --quiet refs/remotes/origin/manifest; then
+            git checkout manifest
+          else
+            git checkout --orphan manifest
+            git rm -rf . 2>/dev/null || true
+          fi
+          if [ -f manifest.json ]; then
+            jq --argjson e "$ENTRY" \
+              '.[0].versions = [$e] + ((.[0].versions // []) | map(select(.version != $e.version)))' \
+              manifest.json > manifest.tmp && mv manifest.tmp manifest.json
+          else
+            jq -n --argjson e "$ENTRY" --arg owner "${GITHUB_REPOSITORY_OWNER}" '[{
+              guid: "b8e4a1f0-6c3d-4a2b-9e5f-1d7c8b0a3f4e",
+              name: "Media Issue Tracker",
+              description: "Adds a media issue tracker board to the Jellyfin web client home page.",
+              overview: "Users can report media issues from the home page or directly from any item page; admins review and resolve reports.",
+              owner: $owner,
+              category: "General",
+              versions: [$e]
+            }]' > manifest.json
+          fi
+          git add manifest.json
+          git commit -m "manifest: v${VERSION}"
+          git push origin manifest

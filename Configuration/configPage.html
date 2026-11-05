@@ -1,0 +1,77 @@
+<div id="NoteboardConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
+  <div class="content-primary">
+    <h1>Noteboard</h1>
+    <p>
+      The noteboard appears on the web client's home page. Users write notes and report
+      media issues; issue reports are visible to administrators, who can resolve them.
+    </p>
+    <form id="noteboardConfigForm">
+      <div class="checkboxContainer checkboxContainer-withDescription">
+        <label>
+          <input is="emby-checkbox" type="checkbox" id="nbEnableInjection" />
+          <span>Show noteboard on the web home page</span>
+        </label>
+        <div class="fieldDescription checkboxFieldDescription">
+          Injects the noteboard into the web client (no disk changes needed; works in Docker). Takes effect on the next page load.
+        </div>
+      </div>
+      <div class="inputContainer">
+        <label class="inputLabel inputLabelUnfocused" for="nbBoardTitle">Board title</label>
+        <input is="emby-input" type="text" id="nbBoardTitle" />
+      </div>
+      <div class="checkboxContainer checkboxContainer-withDescription">
+        <label>
+          <input is="emby-checkbox" type="checkbox" id="nbUsersSeeAll" />
+          <span>Let all users see everyone's notes</span>
+        </label>
+        <div class="fieldDescription checkboxFieldDescription">
+          Off (default): users only see their own notes; admins always see everything.
+          On: the board works like a shared bulletin board. Takes effect immediately.
+        </div>
+      </div>
+      <div class="inputContainer">
+        <label class="inputLabel inputLabelUnfocused" for="nbMaxNotes">Maximum number of notes kept</label>
+        <input is="emby-input" type="number" id="nbMaxNotes" min="10" max="100000" />
+        <div class="fieldDescription">Oldest notes are discarded beyond this limit.</div>
+      </div>
+      <button is="emby-button" type="submit" class="raised button-submit block">
+        <span>Save</span>
+      </button>
+    </form>
+  </div>
+  <script type="text/javascript">
+    (function () {
+      var pluginId = 'b8e4a1f0-6c3d-4a2b-9e5f-1d7c8b0a3f4e';
+
+      function load(page) {
+        Dashboard.showLoadingMsg();
+        ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+          page.querySelector('#nbEnableInjection').checked = config.EnableHomepageInjection !== false;
+          page.querySelector('#nbBoardTitle').value = config.BoardTitle || '';
+          page.querySelector('#nbUsersSeeAll').checked = !!config.UsersCanSeeAllNotes;
+          page.querySelector('#nbMaxNotes').value = config.MaxNotes || 500;
+          Dashboard.hideLoadingMsg();
+        });
+      }
+
+      document.querySelector('#NoteboardConfigPage').addEventListener('pageshow', function () {
+        load(this);
+      });
+
+      document.querySelector('#noteboardConfigForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var page = document.querySelector('#NoteboardConfigPage');
+        Dashboard.showLoadingMsg();
+        ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+          config.EnableHomepageInjection = page.querySelector('#nbEnableInjection').checked;
+          config.BoardTitle = page.querySelector('#nbBoardTitle').value.trim() || 'Media Issue Tracker';
+          config.UsersCanSeeAllNotes = page.querySelector('#nbUsersSeeAll').checked;
+          config.MaxNotes = parseInt(page.querySelector('#nbMaxNotes').value, 10) || 500;
+          ApiClient.updatePluginConfiguration(pluginId, config)
+            .then(Dashboard.processPluginConfigurationUpdateResult);
+        });
+        return false;
+      });
+    })();
+  </script>
+</div>

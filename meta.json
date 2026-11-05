@@ -1,0 +1,15 @@
+{
+  "guid": "b8e4a1f0-6c3d-4a2b-9e5f-1d7c8b0a3f4e",
+  "name": "Media Issue Tracker",
+  "description": "Adds a large noteboard to the web client home page for user notes and media issue reports, with quick media attachment from recently watched items.",
+  "overview": "Places a noteboard window on the Jellyfin web home page. Users can write notes, flag issue reports for the admin, and attach media picked from their recently watched / in-progress items or a library search. Admins see all reports and can resolve or delete them.",
+  "owner": "local",
+  "category": "General",
+  "version": "1.2.1.0",
+  "targetAbi": "10.11.0.0",
+  "framework": "net9.0",
+  "timestamp": "2026-11-03T00:00:00Z",
+  "status": "Active",
+  "autoUpdate": false,
+  "imagePath": ""
+}

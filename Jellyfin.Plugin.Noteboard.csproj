@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Jellyfin 10.11+ / 12.x run on .NET 9.
+         For Jellyfin 10.9/10.10: change to net8.0 and package versions 10.10.7 -->
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Jellyfin.Plugin.Noteboard</RootNamespace>
+    <AssemblyName>Jellyfin.Plugin.Noteboard</AssemblyName>
+    <Version>1.2.1.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Controller" Version="10.11.*" />
+    <PackageReference Include="Jellyfin.Model" Version="10.11.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Configuration\configPage.html" />
+    <EmbeddedResource Include="Web\noteboard.js" />
+    <EmbeddedResource Include="Web\noteboard.css" />
+  </ItemGroup>
+
+</Project>
